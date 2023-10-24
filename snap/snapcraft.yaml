@@ -8,7 +8,7 @@ description: |
 architectures:
   - build-on: amd64
 grade: devel
-confinement: strict
+confinement: devmode
 base: core22
 version: '1.5.4' 
 
@@ -29,16 +29,6 @@ layout:
     bind-file: $SNAP_DATA/etc/ld.so.cache
   /etc/fonts:
     bind: $SNAP/etc/fonts
-
-slots:
-  wine:
-    interface: content
-    source:
-      read:
-      - $SNAP/bin
-      - $SNAP/etc
-      - $SNAP/lib
-      - $SNAP/usr
 
 plugs:
   graphics-core22:
@@ -74,7 +64,7 @@ apps:
   wine:
     command-chain:
       - bin/graphics-core22-wrapper
-    command: usr/bin/wine64
+    command: usr/bin/wine
     plugs: [graphics-core22, desktop, desktop-legacy, hardware-observe, joystick, network, network-bind, opengl, process-control, audio-playback, x11]
 
 parts:
