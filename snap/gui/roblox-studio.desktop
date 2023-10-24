@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Roblox Studio (Vinegar)
+Icon=${SNAP}/meta/gui/roblox-studio.png
+Exec=roblox-studio studio %u
+Terminal=false
+MimeType=application/x-roblox-rbxl;application/x-roblox-rbxlx;x-scheme-handler/roblox-studio;x-scheme-handler/roblox-studio-auth
+Categories=Game

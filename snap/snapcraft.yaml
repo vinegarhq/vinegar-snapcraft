@@ -1,0 +1,290 @@
+name: vinegar
+title: Vinegar
+summary: An open-source, minimal, fast bootstrapper for running Roblox on Linux.
+description: |
+  Vinegar is a powerful open-source bootstrapper for running Roblox on Linux.
+  It offers many configuration options and performance tweaks, and it features
+  Discord Rich Presence integration (through BloxstrapRPC)
+architectures:
+  - build-on: amd64
+grade: devel
+confinement: strict
+base: core22
+version: '1.5.4' 
+
+layout:
+  /usr/share/X11/xkb:
+    bind: $SNAP/usr/share/X11/xkb
+  /usr/share/X11/locale:
+    symlink: $SNAP/usr/share/X11/locale
+  /usr/share/X11/XErrorDB:
+    symlink: $SNAP/graphics/X11/XErrorDB
+  /usr/share/libdrm/amdgpu.ids:
+    bind-file: $SNAP/graphics/usr/share/libdrm/amdgpu.ids
+  /usr/share/drirc.d:
+    bind: $SNAP/graphics/usr/share/drirc.d
+  /usr/share/glvnd/egl_vendor.d:
+    bind: $SNAP/graphics/usr/share/glvnd/egl_vendor.d
+  /etc/ld.so.cache:
+    bind-file: $SNAP_DATA/etc/ld.so.cache
+  /etc/fonts:
+    bind: $SNAP/etc/fonts
+
+slots:
+  wine:
+    interface: content
+    source:
+      read:
+      - $SNAP/bin
+      - $SNAP/etc
+      - $SNAP/lib
+      - $SNAP/usr
+
+plugs:
+  graphics-core22:
+    interface: content
+    target: $SNAP/graphics
+    default-provider: mesa-core22
+
+apps:
+  vinegar:
+    command-chain:
+      - bin/graphics-core22-wrapper
+    command: bin/vinegar
+    desktop: meta/gui/roblox-player.desktop
+    plugs: [graphics-core22, desktop, desktop-legacy, hardware-observe, joystick, network, network-bind, opengl, process-control, audio-playback, x11]
+  roblox-app:
+    command-chain:
+      - bin/graphics-core22-wrapper
+    command: bin/vinegar
+    desktop: meta/gui/roblox-app.desktop
+    plugs: [graphics-core22, desktop, desktop-legacy, hardware-observe, joystick, network, network-bind, opengl, process-control, audio-playback, x11]
+  roblox-player:
+    command-chain:
+      - bin/graphics-core22-wrapper
+    command: bin/vinegar
+    desktop: meta/gui/roblox-player.desktop
+    plugs: [graphics-core22, desktop, desktop-legacy, hardware-observe, joystick, network, network-bind, opengl, process-control, audio-playback, x11]
+  roblox-studio:
+    command-chain:
+      - bin/graphics-core22-wrapper
+    command: bin/vinegar
+    desktop: meta/gui/roblox-studio.desktop
+    plugs: [graphics-core22, desktop, desktop-legacy, hardware-observe, joystick, network, network-bind, opengl, process-control, audio-playback, x11]
+  wine:
+    command-chain:
+      - bin/graphics-core22-wrapper
+    command: usr/bin/wine64
+    plugs: [graphics-core22, desktop, desktop-legacy, hardware-observe, joystick, network, network-bind, opengl, process-control, audio-playback, x11]
+
+parts:
+  vinegar:
+    plugin: go
+    source: https://github.com/vinegarhq/vinegar/archive/refs/tags/v1.5.4.tar.gz
+    build-packages: 
+      - make 
+      - pkg-config 
+      - libwayland-dev 
+      - libvulkan-dev 
+      - libxkbcommon-dev 
+      - libx11-dev 
+      - libegl1-mesa-dev 
+      - libxkbcommon-x11-dev 
+      - libx11-xcb-dev 
+      - libxcursor-dev
+      - libxfixes-dev
+    build-snaps:
+      - go
+    stage-packages:
+      - libegl1
+      - libglvnd0
+      - libx11-6
+      - libx11-xcb1
+      - libxau6
+      - libxcb-xkb1
+      - libxcb1
+      - libxcursor1
+      - libxdmcp6
+      - libxfixes3
+      - libxkbcommon-x11-0
+      - libxkbcommon0
+      - libxrender1
+      - xkb-data
+      - nano
+      - zlib1g
+    override-pull: |
+      craftctl default
+      cd ${CRAFT_PART_SRC}
+      # patch -p1 < $CRAFT_PROJECT_DIR/patches/disablesplash.patch
+  wine:
+    plugin: make
+    source: https://gitlab.winehq.org/wine/wine.git
+    source-type: git  
+    override-pull: |
+      craftctl default
+      cd ${CRAFT_PART_SRC}
+      git checkout wine-8.18 
+      cd ${CRAFT_STAGE}
+      wget https://github.com/wine-staging/wine-staging/archive/refs/tags/v8.18.tar.gz
+      tar -xf v8.18.tar.gz
+      cd wine-staging-8.18
+      python3 ./staging/patchinstall.py DESTDIR="${CRAFT_PART_SRC}" --all
+      cd ${CRAFT_PART_SRC}
+      patch -p1 < $CRAFT_PROJECT_DIR/patches/segregrevert.patch
+      patch -p1 < $CRAFT_PROJECT_DIR/patches/childwindow.patch
+      patch -p1 < $CRAFT_PROJECT_DIR/patches/loader-prefer-winedllpath.patch
+    build-packages:
+      - make
+      - wget
+      - tar
+      - gzip
+      - pkg-config
+      - bison
+      - flex
+      - autoconf
+      - gcc-mingw-w64-x86-64
+      - schedtool 
+      - libfreetype6-dev 
+      - xserver-xorg-dev 
+      - xkb-data
+      - libfreetype6-dev 
+      - libglib2.0-0
+      - libgphoto2-dev
+      - libgstreamer-plugins-base1.0-0
+      - libgstreamer1.0-0
+      - libpulse-dev
+      - libpcap-dev
+      - libusb-1.0-0-dev
+      - libasound2-plugins
+      - libncurses6
+      - libncurses5
+      - libcairo2
+      - libcups2-dev
+      - libdbus-1-dev
+      - libfontconfig-dev
+      - gettext
+      - gettext-base
+      - libgnutls28-dev
+      - libgssapi-krb5-2
+      - libkrb5-dev
+      - libosmesa6-dev
+      - libsdl2-dev
+      - libxcomposite-dev
+      - libxinerama-dev
+      - libxrandr-dev
+      - libxrender1
+      - libxxf86vm-dev
+      - libvulkan-dev
+      - libxkbcommon-dev 
+      - libxi-dev
+      - libx11-dev
+      - libxkbcommon-x11-dev
+      - libx11-xcb-dev
+      - libxcursor-dev
+      - zlib1g-dev
+      - libcapi20-dev
+      - ocl-icd-opencl-dev
+      - python3
+    stage-packages:
+      - libasound2
+      - libasound2-plugins
+      - libavcodec58
+      - libgphoto2-6
+      - libgstreamer-plugins-base1.0-0
+      - libgcrypt20
+      - locales-all
+      - libldap-2.5-0
+      - libncurses5
+      - libopenal1
+      - libpcap0.8
+      - libpulse0
+      - libudev1
+      - libxext6
+      - libxml2
+      - libcapi20-3
+      - libcups2
+      - libcanberra-gtk-module
+      - libdbus-1-3
+      - libfontconfig1
+      - libfreetype6
+      - libglu1-mesa
+      - libgnutls30
+      - libgssapi-krb5-2
+      - libodbc1
+      - libosmesa6
+      - libsane
+      - libsdl2-2.0-0
+      - libv4l-0
+      - libvulkan1
+      - libxcomposite1
+      - libxcursor1
+      - libxfixes3
+      - libxi6
+      - libxinerama1
+      - libxrandr2
+      - libxrender1
+      - libxxf86vm1
+      - ocl-icd-libopencl1
+      - binutils
+      - util-linux
+      - mesa-vulkan-drivers
+      - p7zip-full
+      - mesa-utils
+      - vulkan-tools
+      - pciutils
+      - libappindicator3-1
+      - libpci3
+      - lsof
+      - locales-all
+      - usbutils # Allows finding controllers etc
+      - psmisc
+    override-build: |
+      ./configure \
+      --enable-archs=x86_64 \
+      --prefix=/usr \
+      --disable-tests \
+      --with-x \
+      --with-pulse \
+      --with-dbus \
+      --without-oss
+      craftctl default
+      # cleanup dirs
+      rm -rf $CRAFT_PART_INSTALL/etc/init
+      rm -rf $CRAFT_PART_INSTALL/etc/init.d
+      rm -rf $CRAFT_PART_INSTALL/etc/logrotate.d
+      rm -rf $CRAFT_PART_INSTALL/usr/bin/fc-*
+      rm -rf $CRAFT_PART_INSTALL/usr/bin/gtk-*
+      rm -rf $CRAFT_PART_INSTALL/usr/lib/dconf/dconf-service
+      rm -rf $CRAFT_PART_INSTALL/usr/lib/glib-networking/glib-pacrunner
+      rm -rf $CRAFT_PART_INSTALL/usr/share/GConf
+      rm -rf $CRAFT_PART_INSTALL/usr/share/aclocal
+      rm -rf $CRAFT_PART_INSTALL/usr/share/apport
+      rm -rf $CRAFT_PART_INSTALL/usr/share/apps
+      rm -rf $CRAFT_PART_INSTALL/usr/share/bash-completion
+      rm -rf $CRAFT_PART_INSTALL/usr/share/bug
+      rm -rf $CRAFT_PART_INSTALL/usr/share/debhelper
+      rm -rf $CRAFT_PART_INSTALL/usr/share/doc
+      rm -rf $CRAFT_PART_INSTALL/usr/share/doc-base
+      rm -rf $CRAFT_PART_INSTALL/usr/share/icons/Adwaita
+      rm -rf $CRAFT_PART_INSTALL/usr/share/icons/Humanity*
+      rm -rf $CRAFT_PART_INSTALL/usr/share/icons/LoginIcons
+      rm -rf $CRAFT_PART_INSTALL/usr/share/icons/ubuntu-mono*
+      rm -rf $CRAFT_PART_INSTALL/usr/share/info
+      rm -rf $CRAFT_PART_INSTALL/usr/share/kde4
+      rm -rf $CRAFT_PART_INSTALL/usr/share/lintian
+      rm -rf $CRAFT_PART_INSTALL/usr/share/menu
+      rm -rf $CRAFT_PART_INSTALL/usr/share/man
+      rm -rf $CRAFT_PART_INSTALL/usr/share/perl5
+      rm -rf $CRAFT_PART_INSTALL/usr/share/pixmaps
+      rm -rf $CRAFT_PART_INSTALL/usr/share/pkgconfig
+      cp $CRAFT_PART_INSTALL/usr/bin/wine64 $CRAFT_PART_INSTALL/usr/bin/wine
+
+  graphics-core22:
+    after: [wine]
+    source: https://github.com/MirServer/graphics-core22.git
+    plugin: dump
+    override-prime: |
+      craftctl default
+      ${CRAFT_PART_SRC}/bin/graphics-core22-cleanup mesa-core22 nvidia-core22
+    prime:
+    - bin/graphics-core22-wrapper
