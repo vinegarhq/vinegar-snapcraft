@@ -106,6 +106,7 @@ parts:
       craftctl default
       cd ${CRAFT_PART_SRC}
       # patch -p1 < $CRAFT_PROJECT_DIR/patches/disablesplash.patch
+
   wine:
     plugin: make
     source: https://gitlab.winehq.org/wine/wine.git
@@ -268,9 +269,74 @@ parts:
       rm -rf $CRAFT_PART_INSTALL/usr/share/pixmaps
       rm -rf $CRAFT_PART_INSTALL/usr/share/pkgconfig
       cp $CRAFT_PART_INSTALL/usr/bin/wine64 $CRAFT_PART_INSTALL/usr/bin/wine
-
-  graphics-core22:
+  
+  gamemode:
     after: [wine]
+    plugin: nil
+    stage-packages: [gamemode]
+
+  # the ubuntu hwdata package is broken, will build manually instead (gamescope dep)
+  hwdata:
+    after: [gamemode]
+    plugin: make
+    source: https://github.com/vcrhonek/hwdata/archive/refs/tags/v0.375.tar.gz
+    override-build: |
+      ./configure
+      craftctl default
+
+  # no vkroots package in ubuntu repositories, build instead (gamescope dep)
+  vkroots:
+    after: [hwdata]
+    plugin: meson
+    source: https://github.com/Joshua-Ashton/vkroots.git
+
+  gamescope:
+    after: [vkroots]
+    plugin: meson
+    meson-parameters: 
+      - --prefix=/usr
+    source: https://github.com/ValveSoftware/gamescope/archive/refs/tags/3.11.43.tar.gz # last version to build on ubuntu 22.04
+    build-packages:
+      - meson
+      - wayland-protocols
+      - cmake
+      - libcap-dev
+      - libwayland-dev
+      - libwlroots-dev
+      - libx11-dev
+      - libxtst-dev
+      - libxres-dev
+      - libxmu-dev
+      - glslang-dev
+      - glslang-tools
+      - libxdamage-dev
+      - libvulkan-dev
+      - libopenvr-dev
+      - libstb-dev
+    stage-packages:
+      - libcap2
+      - libwayland-client0
+      - libwayland-server0
+      - libwlroots10
+      - xwayland
+      - libx11-dev
+      - libxtst6
+      - libxres1
+      - libxmu6
+      - libvulkan1
+      - libopenvr-api1
+      - libstb0
+      - libxdamage1
+    override-pull: |
+      craftctl default
+      git clone https://gitlab.freedesktop.org/wlroots/wlroots.git subprojects/wlroots
+      cd subprojects/wlroots && git reset --hard 9f41627aa10a94d9427bc315fa3d363a61b94d7c
+      cd ..
+      git clone https://gitlab.freedesktop.org/emersion/libliftoff
+      cd libliftoff && git reset --hard 9c84f7945aab0d88365f4c878f9de8a68deca3ea
+  
+  graphics-core22:
+    after: [gamescope]
     source: https://github.com/MirServer/graphics-core22.git
     plugin: dump
     override-prime: |
