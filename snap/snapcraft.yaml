@@ -10,7 +10,7 @@ architectures:
 grade: devel
 confinement: devmode
 base: core22
-version: '1.5.4' 
+version: '1.5.6'
 
 layout:
   /usr/share/X11/xkb:
@@ -70,17 +70,17 @@ apps:
 parts:
   vinegar:
     plugin: go
-    source: https://github.com/vinegarhq/vinegar/archive/refs/tags/v1.5.4.tar.gz
-    build-packages: 
-      - make 
-      - pkg-config 
-      - libwayland-dev 
-      - libvulkan-dev 
-      - libxkbcommon-dev 
-      - libx11-dev 
-      - libegl1-mesa-dev 
-      - libxkbcommon-x11-dev 
-      - libx11-xcb-dev 
+    source: https://github.com/vinegarhq/vinegar/archive/refs/tags/v1.5.6.tar.gz
+    build-packages:
+      - make
+      - pkg-config
+      - libwayland-dev
+      - libvulkan-dev
+      - libxkbcommon-dev
+      - libx11-dev
+      - libegl1-mesa-dev
+      - libxkbcommon-x11-dev
+      - libx11-xcb-dev
       - libxcursor-dev
       - libxfixes-dev
     build-snaps:
@@ -110,11 +110,11 @@ parts:
   wine:
     plugin: make
     source: https://gitlab.winehq.org/wine/wine.git
-    source-type: git  
+    source-type: git
     override-pull: |
       craftctl default
       cd ${CRAFT_PART_SRC}
-      git checkout wine-8.18 
+      git checkout wine-8.18
       cd ${CRAFT_STAGE}
       wget https://github.com/wine-staging/wine-staging/archive/refs/tags/v8.18.tar.gz
       tar -xf v8.18.tar.gz
@@ -134,11 +134,11 @@ parts:
       - flex
       - autoconf
       - gcc-mingw-w64-x86-64
-      - schedtool 
-      - libfreetype6-dev 
-      - xserver-xorg-dev 
+      - schedtool
+      - libfreetype6-dev
+      - xserver-xorg-dev
       - xkb-data
-      - libfreetype6-dev 
+      - libfreetype6-dev
       - libglib2.0-0
       - libgphoto2-dev
       - libgstreamer-plugins-base1.0-0
@@ -166,7 +166,7 @@ parts:
       - libxrender1
       - libxxf86vm-dev
       - libvulkan-dev
-      - libxkbcommon-dev 
+      - libxkbcommon-dev
       - libxi-dev
       - libx11-dev
       - libxkbcommon-x11-dev
@@ -269,7 +269,7 @@ parts:
       rm -rf $CRAFT_PART_INSTALL/usr/share/pixmaps
       rm -rf $CRAFT_PART_INSTALL/usr/share/pkgconfig
       cp $CRAFT_PART_INSTALL/usr/bin/wine64 $CRAFT_PART_INSTALL/usr/bin/wine
-  
+
   gamemode:
     after: [wine]
     plugin: nil
@@ -293,7 +293,7 @@ parts:
   gamescope:
     after: [vkroots]
     plugin: meson
-    meson-parameters: 
+    meson-parameters:
       - --prefix=/usr
     source: https://github.com/ValveSoftware/gamescope/archive/refs/tags/3.11.43.tar.gz # last version to build on ubuntu 22.04
     build-packages:
@@ -334,7 +334,7 @@ parts:
       cd ..
       git clone https://gitlab.freedesktop.org/emersion/libliftoff
       cd libliftoff && git reset --hard 9c84f7945aab0d88365f4c878f9de8a68deca3ea
-  
+
   graphics-core22:
     after: [gamescope]
     source: https://github.com/MirServer/graphics-core22.git
