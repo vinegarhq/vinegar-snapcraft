@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Roblox App (Vinegar)
+Name=Roblox App
 Icon=${SNAP}/meta/gui/roblox-player.png
 Exec=roblox-app player -app
 Terminal=false

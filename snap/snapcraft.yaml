@@ -10,7 +10,7 @@ architectures:
 grade: devel
 confinement: devmode
 base: core22
-version: '1.5.6'
+version: '1.5.7'
 
 layout:
   /usr/share/X11/xkb:
@@ -70,7 +70,7 @@ apps:
 parts:
   vinegar:
     plugin: go
-    source: https://github.com/vinegarhq/vinegar/archive/refs/tags/v1.5.6.tar.gz
+    source: https://github.com/vinegarhq/vinegar/archive/refs/tags/v1.5.7.tar.gz
     build-packages:
       - make
       - pkg-config

@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Roblox Studio (Vinegar)
+Name=Roblox Studio
 Icon=${SNAP}/meta/gui/roblox-studio.png
 Exec=roblox-studio studio %u
 Terminal=false
